@@ -35,10 +35,9 @@ body{font-family:sans-serif;padding:1rem;background:#f9f9f9;color:#111;max-width
 .ub-logout{font-size:11px;color:#666;cursor:pointer;text-decoration:underline;}
 
 /* ── 전송 상태 표시 ── */
-.send-indicator{font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px;}
-.send-ok{background:#EAF3DE;color:#3B6D11;}
-.send-fail{background:#FCEBEB;color:#A32D2D;}
-.send-ing{background:#FAEEDA;color:#854F0B;}
+.class-btn{flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;background:white;font-size:18px;font-weight:500;cursor:pointer;color:#666;transition:all 0.15s;}
+.class-btn.selected{border-color:#1D9E75;background:#E1F5EE;color:#085041;font-weight:700;}
+.class-btn:hover{border-color:#1D9E75;color:#1D9E75;}
 .hd{text-align:center;margin-bottom:1.1rem;}
 .hd h1{font-size:20px;font-weight:500;margin-bottom:4px;}
 .hd p{font-size:12px;color:#666;}
@@ -101,15 +100,20 @@ body{font-family:sans-serif;padding:1rem;background:#f9f9f9;color:#111;max-width
   <div class="login-title">キャンパス韓国語<br>文型練習</div>
   <div class="login-sub">先生から配布された<br>ログインIDを入力してください</div>
   <div class="login-box">
-    <span class="login-label">ログインID（例：01, 02, 03…）</span>
+    <span class="login-label">① クラスを選択してください</span>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button class="class-btn" id="btn-A" onclick="selectClass('A')">A クラス</button>
+      <button class="class-btn" id="btn-B" onclick="selectClass('B')">B クラス</button>
+    </div>
+    <span class="login-label">② 出席番号を入力してください</span>
     <div class="login-input-wrap">
-      <div class="login-prefix">P</div>
-      <input class="login-input" id="code-input" type="number" min="1" max="99"
-        placeholder="00" maxlength="2"
+      <div class="login-prefix" id="class-prefix">　</div>
+      <input class="login-input" id="code-input" type="number"
+        placeholder="01" maxlength="2"
         oninput="this.value=this.value.slice(0,2)"
         onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div class="login-err" id="login-err">IDを正しく入力してください（01〜99）</div>
+    <div class="login-err" id="login-err">　</div>
     <button class="login-btn" id="login-btn" onclick="doLogin()">ログイン →</button>
   </div>
   <div style="font-size:11px;color:#aaa;text-align:center;">
@@ -283,25 +287,47 @@ function genSession(){return Date.now().toString(36).toUpperCase();}
 /* ════════════════════════════════════
    ログイン / ログアウト
    ════════════════════════════════════ */
+/* ── 클래스별 인원 설정 ── */
+const CLASS_MAX = { A: 35, B: 28 };
+let selectedClass = '';
+
+function selectClass(c) {
+  selectedClass = c;
+  document.getElementById('btn-A').classList.toggle('selected', c==='A');
+  document.getElementById('btn-B').classList.toggle('selected', c==='B');
+  document.getElementById('class-prefix').textContent = c;
+  document.getElementById('login-err').textContent = '　';
+  document.getElementById('code-input').focus();
+}
+
 function doLogin(){
-  const v = document.getElementById('code-input').value.trim();
-  const n = parseInt(v);
-  if(!v || isNaN(n) || n<1 || n>99){
-    document.getElementById('login-err').style.display='block';
+  const err = document.getElementById('login-err');
+  // 반 선택 확인
+  if(!selectedClass){
+    err.style.color='#A32D2D';
+    err.textContent='クラス（AまたはB）を選択してください';
     return;
   }
-  studentId = 'P' + String(n).padStart(2,'0');
+  const v = document.getElementById('code-input').value.trim();
+  const n = parseInt(v);
+  const max = CLASS_MAX[selectedClass];
+  if(!v || isNaN(n) || n < 1 || n > max){
+    err.style.color='#A32D2D';
+    err.textContent=`番号を正しく入力してください（01〜${String(max).padStart(2,'0')}）`;
+    return;
+  }
+  studentId = selectedClass + String(n).padStart(2,'0'); // A01, B28 등
   sessionId = genSession();
   sessionStart = Date.now();
 
-  // 画面切替
+  // 화면 전환
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-screen').style.display='block';
   document.getElementById('ub-id-text').textContent = studentId + ' さん';
   document.getElementById('ub-session-text').textContent =
     'セッション開始: ' + nowStr();
 
-  // セッション開始ログ送信
+  // 세션 시작 로그
   sendLog({
     type:'SESSION_START', student:studentId, session:sessionId,
     timestamp:nowStr(), lessonNum:'', questionNum:'',
