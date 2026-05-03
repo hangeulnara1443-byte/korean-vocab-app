@@ -25,7 +25,7 @@ body{font-family:sans-serif;padding:1rem;background:#f9f9f9;color:#111;max-width
 .login-btn{width:100%;padding:14px;background:#1D9E75;color:white;border:none;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;transition:background 0.15s;}
 .login-btn:hover{background:#178060;}
 .login-btn:disabled{background:#aaa;cursor:not-allowed;}
-.login-err{font-size:12px;color:#A32D2D;text-align:center;display:none;}
+.login-err{font-size:12px;color:#A32D2D;text-align:center;min-height:18px;margin-bottom:8px;}
 
 /* ── 학생 정보 표시 바 ── */
 #user-bar{display:none;background:#E1F5EE;border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
@@ -296,7 +296,7 @@ function selectClass(c) {
   document.getElementById('btn-A').classList.toggle('selected', c==='A');
   document.getElementById('btn-B').classList.toggle('selected', c==='B');
   document.getElementById('class-prefix').textContent = c;
-  document.getElementById('login-err').textContent = '　';
+  document.getElementById('login-err').textContent = '';
   document.getElementById('code-input').focus();
 }
 
@@ -304,19 +304,18 @@ function doLogin(){
   const err = document.getElementById('login-err');
   // 반 선택 확인
   if(!selectedClass){
-    err.style.color='#A32D2D';
-    err.textContent='クラス（AまたはB）を選択してください';
+    err.textContent = 'クラス（AまたはB）を選択してください';
     return;
   }
   const v = document.getElementById('code-input').value.trim();
   const n = parseInt(v);
   const max = CLASS_MAX[selectedClass];
   if(!v || isNaN(n) || n < 1 || n > max){
-    err.style.color='#A32D2D';
-    err.textContent=`番号を正しく入力してください（01〜${String(max).padStart(2,'0')}）`;
+    err.textContent = `番号を正しく入力してください（01〜${String(max).padStart(2,'0')}）`;
     return;
   }
-  studentId = selectedClass + String(n).padStart(2,'0'); // A01, B28 등
+  err.textContent = '';
+  studentId = selectedClass + String(n).padStart(2,'0');
   sessionId = genSession();
   sessionStart = Date.now();
 
