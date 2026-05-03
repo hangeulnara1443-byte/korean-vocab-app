@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="韓国語練習">
+<meta name="theme-color" content="#1D9E75">
+<title>キャンパス韓国語 文型練習</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;padding:1rem;background:#f9f9f9;color:#111;max-width:480px;margin:0 auto;}
+
+/* ── 로그인 화면 ── */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px;}
+.login-logo{font-size:40px;margin-bottom:4px;}
+.login-title{font-size:20px;font-weight:500;color:#111;text-align:center;}
+.login-sub{font-size:13px;color:#666;text-align:center;line-height:1.6;}
+.login-box{width:100%;background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.login-label{font-size:12px;color:#666;margin-bottom:6px;display:block;}
+.login-input-wrap{display:flex;align-items:center;border:1.5px solid #ddd;border-radius:10px;overflow:hidden;background:white;margin-bottom:14px;}
+.login-prefix{padding:12px 10px 12px 14px;font-size:18px;font-weight:500;color:#1D9E75;background:#E1F5EE;border-right:1.5px solid #ddd;}
+.login-input{flex:1;padding:12px 14px;font-size:20px;font-weight:500;border:none;outline:none;letter-spacing:3px;font-family:monospace;}
+.login-btn{width:100%;padding:14px;background:#1D9E75;color:white;border:none;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.login-btn:hover{background:#178060;}
+.login-btn:disabled{background:#aaa;cursor:not-allowed;}
+.login-err{font-size:12px;color:#A32D2D;text-align:center;display:none;}
+
+/* ── 학생 정보 표시 바 ── */
+#user-bar{display:none;background:#E1F5EE;border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+#user-bar.show{display:flex;}
+.ub-id{font-size:13px;font-weight:500;color:#085041;}
+.ub-session{font-size:11px;color:#3B8A6E;}
+.ub-logout{font-size:11px;color:#666;cursor:pointer;text-decoration:underline;}
+
+/* ── 전송 상태 표시 ── */
+.send-indicator{font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px;}
+.send-ok{background:#EAF3DE;color:#3B6D11;}
+.send-fail{background:#FCEBEB;color:#A32D2D;}
+.send-ing{background:#FAEEDA;color:#854F0B;}
+.hd{text-align:center;margin-bottom:1.1rem;}
+.hd h1{font-size:20px;font-weight:500;margin-bottom:4px;}
+.hd p{font-size:12px;color:#666;}
+.badge{display:inline-block;background:#E1F5EE;color:#0F6E56;font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:6px;}
+.ls-label{font-size:11px;color:#666;margin-bottom:5px;display:block;}
+.lg{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:4px;}
+.lbtn{padding:6px 2px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;cursor:pointer;font-size:10px;color:#666;text-align:center;line-height:1.4;}
+.lbtn:hover{border-color:#1D9E75;color:#1D9E75;}
+.lbtn.active{background:#1D9E75;color:white;border-color:#1D9E75;font-weight:500;}
+.lbtn.done{background:#EAF3DE;border-color:#3B6D11;color:#3B6D11;}
+.li{background:#f0f0f0;border-radius:10px;padding:9px 13px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;}
+.li-n{font-size:11px;color:#1D9E75;font-weight:500;}
+.li-t{font-size:13px;font-weight:500;margin-top:1px;}
+.li-g{font-size:10px;color:#666;margin-top:2px;}
+.sc{text-align:right;}
+.sc-v{font-size:22px;font-weight:500;color:#1D9E75;}
+.sc-l{font-size:10px;color:#666;}
+.pr{display:flex;justify-content:space-between;margin-bottom:4px;}
+.pr span{font-size:11px;color:#666;}
+.pb{height:4px;background:#ddd;border-radius:2px;margin-bottom:11px;}
+.pf{height:100%;background:#1D9E75;border-radius:2px;transition:width 0.3s;}
+.hc{display:inline-flex;align-items:center;gap:5px;background:#FAEEDA;border:1px solid #EF9F27;border-radius:20px;padding:5px 14px;font-size:13px;color:#854F0B;margin-bottom:9px;}
+.hl{font-size:10px;color:#BA7517;font-weight:500;}
+.qc{background:#f0f0f0;border-radius:10px;padding:1rem;margin-bottom:9px;}
+.qk{font-size:17px;line-height:2.6;}
+.bl{display:inline-block;min-width:90px;border-bottom:2.5px solid #1D9E75;text-align:center;color:#1D9E75;font-weight:500;padding:0 5px;transition:all 0.2s;}
+.bl.ok{border-bottom:2.5px solid #3B6D11;color:#3B6D11;background:#EAF3DE;border-radius:3px;padding:2px 7px;}
+.bl.ng{border-bottom:2.5px solid #A32D2D;color:#A32D2D;background:#FCEBEB;border-radius:3px;padding:2px 7px;}
+.os{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.ob{padding:8px 14px;border:1px solid #ccc;border-radius:20px;background:white;cursor:pointer;font-size:14px;transition:all 0.15s;}
+.ob:hover{border-color:#1D9E75;background:#E1F5EE;}
+.ob.used{opacity:0.35;pointer-events:none;}
+.ob.co{background:#EAF3DE;border-color:#3B6D11;color:#3B6D11;font-weight:500;}
+.fb{font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px;display:none;line-height:1.7;}
+.fb.show{display:block;}
+.fb.ok{background:#EAF3DE;color:#3B6D11;}
+.fb.ng{background:#FCEBEB;color:#A32D2D;}
+.fb-f{font-size:13px;font-weight:500;margin-bottom:2px;}
+.fb-n{font-size:11px;opacity:0.88;}
+.nb{width:100%;padding:10px;margin-top:8px;border:none;border-radius:8px;background:#1D9E75;color:white;cursor:pointer;font-size:14px;font-weight:500;display:none;}
+.nb.show{display:block;}
+.fin{text-align:center;padding:1.5rem 1rem;}
+.fin h3{font-size:17px;font-weight:500;margin-bottom:4px;}
+.fin .big{font-size:28px;font-weight:500;color:#1D9E75;margin:10px 0;}
+.fin .gram{font-size:12px;color:#666;margin-bottom:14px;}
+.fbs{display:flex;gap:8px;justify-content:center;}
+.fbs button{padding:9px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;}
+.fr{background:#1D9E75;color:white;border:none;}
+.fn{background:transparent;color:#1D9E75;border:1px solid #1D9E75;}
+.tip{background:#E1F5EE;border-radius:8px;padding:8px 12px;margin-top:8px;}
+.tip p{font-size:11px;color:#0F6E56;}
+.sn{font-size:10px;background:#EEEDFE;color:#3C3489;border-radius:10px;padding:2px 8px;margin-left:4px;}
+</style>
+</head>
+<body>
+
+<!-- ── 로그인 화면 ── -->
+<div id="login-screen">
+  <div class="login-logo">🇰🇷</div>
+  <div class="login-title">キャンパス韓国語<br>文型練習</div>
+  <div class="login-sub">先生から配布された<br>ログインIDを入力してください</div>
+  <div class="login-box">
+    <span class="login-label">ログインID（例：01, 02, 03…）</span>
+    <div class="login-input-wrap">
+      <div class="login-prefix">P</div>
+      <input class="login-input" id="code-input" type="number" min="1" max="99"
+        placeholder="00" maxlength="2"
+        oninput="this.value=this.value.slice(0,2)"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-err" id="login-err">IDを正しく入力してください（01〜99）</div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">ログイン →</button>
+  </div>
+  <div style="font-size:11px;color:#aaa;text-align:center;">
+    キャンパス韓国語 第2版 準拠<br>第5課〜第13課
+  </div>
+</div>
+
+<!-- ── メイン画面 ── -->
+<div id="main-screen" style="display:none;">
+  <div id="user-bar" class="show">
+    <div>
+      <div class="ub-id" id="ub-id-text"></div>
+      <div class="ub-session" id="ub-session-text"></div>
+    </div>
+    <span class="ub-logout" onclick="doLogout()">ログアウト</span>
+  </div>
+<div class="hd">
+  <span class="badge">キャンパス韓国語 第2版</span>
+  <h1>文型練習 — 穴埋め問題</h1>
+  <p>教科書の順序・語彙・文体に準拠　第5課〜第13課</p>
+</div>
+<div style="margin-bottom:1rem;">
+  <span class="ls-label">▸ 前半 第5〜10課 <span class="sn">합니다体</span></span>
+  <div class="lg" id="ga"></div>
+  <div style="height:6px"></div>
+  <span class="ls-label">▸ 後半 第11〜13課 <span class="sn">해요体</span></span>
+  <div class="lg" id="gb"></div>
+</div>
+<div id="body"></div>
+
+</div><!-- /main-screen -->
+
+<script>
+const L=[
+/* 5과 */
+{num:5,title:'저는 우에다입니다.',gram:'〜입니까/입니다 / 〜가/이 아닙니다 / 〜는/은 / 〜도',qs:[
+  {b:'저는 우에다（',a:'）.',ans:'입니다',h:'です（自己紹介）',d:['입니까','아닙니다','습니다'],full:'저는 우에다입니다.',note:'〜입니다：〜です(格式体)。이름(받침なし)＋입니다'},
+  {b:'우에다 씨는 학생（',a:')?',ans:'입니까',h:'ですか',d:['입니다','아닙니까','습니까'],full:'우에다 씨는 학생입니까?',note:'〜입니까？：〜ですか(格式疑問)'},
+  {b:'저는 학생（',a:'）.',ans:'입니다',h:'です（学生）',d:['입니까','아닙니다','이에요'],full:'저는 학생입니다.',note:'학생(받침あり)+입니다。직업 표현의 기본형'},
+  {b:'저는 선생님（',a:'）.',ans:'입니다',h:'です（先生）',d:['입니까','아닙니다','이에요'],full:'저는 선생님입니다.',note:'직업 어휘：학생、선생님、의사、디자이너、회사원'},
+  {b:'저는 회사원이（',a:'）.',ans:'아닙니다',h:'ではありません（会社員）',d:['입니다','없습니다','않습니다'],full:'저는 회사원이 아닙니다.',note:'받침あり→이 아닙니다。받침なし→가 아닙니다'},
+  {b:'저는 의사가（',a:'）.',ans:'아닙니다',h:'ではありません（医者）',d:['입니다','없습니다','않습니다'],full:'저는 의사가 아닙니다.',note:'의사(받침なし)→의사가 아닙니다'},
+  {b:'저（',a:'） 우에다입니다.',ans:'는',h:'は（私）',d:['가','도','을'],full:'저는 우에다입니다.',note:'저(받침なし)→저는。학생(받침あり)→학생은'},
+  {b:'이수민 씨（',a:'） 한국 사람입니다.',ans:'는',h:'は（李スミンさん）',d:['은','도','이'],full:'이수민 씨는 한국 사람입니다.',note:'이수민 씨：씨를 붙이면 받침なし(씨)→는'},
+  {b:'저（',a:'） 학생입니다.',ans:'도',h:'も',d:['는','은','을'],full:'저도 학생입니다.',note:'〜도：〜も。받침의 유무에 영향받지 않습니다'},
+  {b:'이수민 씨（',a:'） 일본 사람입니까?',ans:'도',h:'も（李スミンさんも）',d:['는','은','이'],full:'이수민 씨도 일본 사람입니까?',note:'이수민 씨도：씨와 함께 정중한 표현'},
+]},
+/* 6과 */
+{num:6,title:'지수 씨, 공부합니까?',gram:'〜(스)ㅂ니까/ㅂ니다 / 〜지 않습니다 / 〜를/을',qs:[
+  {b:'지수 씨, 공부（',a:')?',ans:'합니까',h:'しますか（勉強）',d:['합니다','했습니까','하지 않습니까'],full:'지수 씨, 공부합니까?',note:'공부하다+ㅂ니까→공부합니까？。格式疑問形'},
+  {b:'네, 공부（',a:'）.',ans:'합니다',h:'します（勉強）',d:['합니까','했습니다','하지 않습니다'],full:'네, 공부합니다.',note:'공부하다+ㅂ니다→공부합니다。格式肯定形'},
+  {b:'아니요, （',a:'）.',ans:'공부하지 않습니다',h:'勉強しません',d:['공부합니다','공부합니까','공부했습니다'],full:'아니요, 공부하지 않습니다.',note:'〜지 않습니다：格式否定。공부하다→공부하지 않습니다'},
+  {b:'무엇을（',a:')?',ans:'봅니까',h:'見ますか',d:['봅니다','봤습니까','보지 않습니까'],full:'무엇을 봅니까?',note:'보다→봅니까？。語幹(받침なし)+ㅂ니까？'},
+  {b:'드라마를（',a:'）.',ans:'봅니다',h:'見ます',d:['봅니까','봤습니다','보지 않습니다'],full:'드라마를 봅니다.',note:'보다→봅니다'},
+  {b:'드라마는（',a:')?',ans:'재미있습니까',h:'面白いですか',d:['재미없습니까','재미있습니다','재미없습니다'],full:'드라마는 재미있습니까?',note:'재미있다는 하나의 단어。재미있다→재미있습니까？'},
+  {b:'아주（',a:'）.',ans:'재미있습니다',h:'面白いです',d:['재미없습니다','재미있습니까','재미없습니까'],full:'아주 재미있습니다.',note:'재미있다→재미있습니다。재미없다→재미없습니다'},
+  {b:'텔레비전（',a:'） 봅니다.',ans:'을',h:'を（テレビ）',d:['를','이','는'],full:'텔레비전을 봅니다.',note:'텔레비전(받침あり)→을。드라마(받침なし)→를'},
+  {b:'밥을 （',a:'）.',ans:'먹지 않습니다',h:'食べません',d:['먹습니다','먹습니까','먹었습니다'],full:'밥을 먹지 않습니다.',note:'먹다→먹지 않습니다。〜지 않습니다：格式否定'},
+  {b:'한국어는（',a:'）.',ans:'어렵지 않습니다',h:'難しくありません',d:['어렵습니다','어렵습니까','어려웠습니다'],full:'한국어는 어렵지 않습니다.',note:'어렵다→어렵지 않습니다。형용사도 같은 패턴'},
+]},
+/* 7과 */
+{num:7,title:'학교에 기숙사가 있습니까?',gram:'있습니다/없습니다 / 지시표현(이,그,저) / 〜에 / 〜와/과',qs:[
+  {b:'학교에 기숙사가（',a:')?',ans:'있습니까',h:'ありますか',d:['없습니까','있습니다','없습니다'],full:'학교에 기숙사가 있습니까?',note:'있다→있습니까？'},
+  {b:'예, （',a:'）.',ans:'있습니다',h:'あります',d:['없습니다','있습니까','있어요'],full:'예, 있습니다.',note:'있다→있습니다'},
+  {b:'아니요, （',a:'）.',ans:'없습니다',h:'ありません',d:['있습니다','없습니까','없어요'],full:'아니요, 없습니다.',note:'없다→없습니다'},
+  {b:'룸메이트가（',a:')?',ans:'있습니까',h:'いますか（ルームメイト）',d:['없습니까','있습니다','없습니다'],full:'룸메이트가 있습니까?',note:'사람·동물에도 있다/없다를 사용'},
+  {b:'방 안에 침대와（',a:'） 있습니다.',ans:'책상이',h:'机が（〜と）',d:['책상을','책상은','책상도'],full:'방 안에 침대와 책상이 있습니다.',note:'침대(받침なし)→침대와。책상(받침あり)→책상이'},
+  {b:'（',a:'） 기숙사는 어디에 있습니까?',ans:'이',h:'この',d:['그','저','어느'],full:'이 기숙사는 어디에 있습니까?',note:'이(この)、그(その)、저(あの)：거리에 따라 구분'},
+  {b:'（',a:'） 사람은 제 룸메이트입니다.',ans:'저',h:'あの',d:['이','그','어느'],full:'저 사람은 제 룸메이트입니다.',note:'저(あの)：話し手・聞き手 양쪽에서 먼 것'},
+  {b:'（',a:'） 방은 넓습니까?',ans:'그',h:'その',d:['이','저','어느'],full:'그 방은 넓습니까?',note:'그(その)：聞き手에 가까운 것'},
+  {b:'기숙사는 학교（',a:'） 있습니다.',ans:'에',h:'に（学校に）',d:['에서','와','을'],full:'기숙사는 학교에 있습니다.',note:'〜에 있다：〜にある/いる'},
+  {b:'제 방에 침대（',a:'） 책상이 있습니다.',ans:'와',h:'と（ベッド）',d:['과','하고','도'],full:'제 방에 침대와 책상이 있습니다.',note:'침대(받침なし)→침대와'},
+]},
+/* 8과 */
+{num:8,title:'오후에 뭐 해요?',gram:'〜아/어/여요 / 안〜 / 〜에 / 〜에서',qs:[
+  {b:'오늘 학교에（',a:')?',ans:'가요',h:'行きますか',d:['갑니다','갔어요','가지 않아요'],full:'오늘 학교에 가요?',note:'가다→가요(해요体)。8과부터 해요体 시작'},
+  {b:'네, （',a:'）.',ans:'가요',h:'行きます',d:['갑니다','갔어요','가지 않아요'],full:'네, 가요.',note:'가다→가요'},
+  {b:'아뇨, （',a:'） 가요.',ans:'안',h:'〜しません（行か）',d:['못','지','도'],full:'아뇨, 안 가요.',note:'안＋動詞：意志的否定'},
+  {b:'오늘 수업이（',a:')?',ans:'있어요',h:'ありますか（授業）',d:['없어요','있습니다','있어요?'],full:'오늘 수업이 있어요?',note:'있다→있어요(해요体)'},
+  {b:'아뇨, 수업이（',a:'）.',ans:'없어요',h:'ありません（授業）',d:['있어요','없습니다','없어요?'],full:'아뇨, 수업이 없어요.',note:'없다→없어요'},
+  {b:'오후에 친구를（',a:'）.',ans:'만나요',h:'会います',d:['만납니다','만났어요','만나지 않아요'],full:'오후에 친구를 만나요.',note:'만나다→만나요'},
+  {b:'어디서 친구를（',a:')?',ans:'만나요',h:'会いますか（どこで）',d:['만납니다','만났어요','만나지 않아요'],full:'어디서 친구를 만나요?',note:'어디서=어디에서'},
+  {b:'백화점（',a:'） 쇼핑해요.',ans:'에서',h:'で（デパート）',d:['에','을','와'],full:'백화점에서 쇼핑해요.',note:'〜에서：動作의 場所(〜で)'},
+  {b:'학교（',a:'） 가요.',ans:'에',h:'へ（学校）',d:['에서','을','와'],full:'학교에 가요.',note:'〜에 가다：〜に行く'},
+  {b:'약속이（',a:'）.',ans:'있어요',h:'あります（約束）',d:['없어요','있습니다','있어요?'],full:'약속이 있어요.',note:'약속이 있다：約束がある'},
+]},
+/* 9과 */
+{num:9,title:'토요일에 뭐 했어요?',gram:'〜았/었/였〜 / 〜아/어/여서 / 〜는/은요？',qs:[
+  {b:'토요일에 뭐（',a:')?',ans:'했어요',h:'しましたか',d:['해요','하겠어요','했습니까'],full:'토요일에 뭐 했어요?',note:'하다→했어요(過去)'},
+  {b:'도서관에（',a:'）.',ans:'갔어요',h:'行きました',d:['가요','가겠어요','갑니다'],full:'도서관에 갔어요.',note:'가다→갔어요(過去)'},
+  {b:'친구를（',a:'）.',ans:'만났어요',h:'会いました',d:['만나요','만나겠어요','만납니다'],full:'친구를 만났어요.',note:'만나다→만났어요(過去)'},
+  {b:'영화를（',a:'）.',ans:'봤어요',h:'見ました',d:['봐요','보겠어요','봅니다'],full:'영화를 봤어요.',note:'보다→봤어요(過去)'},
+  {b:'집에（',a:'）.',ans:'있었어요',h:'いました/ありました',d:['있어요','있겠어요','있습니다'],full:'집에 있었어요.',note:'있다→있었어요(過去)'},
+  {b:'피곤（',a:'） 집에 있었어요.',ans:'해서',h:'疲れて（だから）',d:['하고','하지만','하니까'],full:'피곤해서 집에 있었어요.',note:'피곤하다→피곤해서。〜아/어서：理由'},
+  {b:'비가 와（',a:'） 집에 있었어요.',ans:'서',h:'雨が降って',d:['고','지만','도'],full:'비가 와서 집에 있었어요.',note:'오다→와서'},
+  {b:'밥을 먹（',a:'） 도서관에 갔어요.',ans:'어서',h:'食べてから',d:['고','지만','도'],full:'밥을 먹어서 도서관에 갔어요.',note:'먹다→먹어서'},
+  {b:'저는 영화를 봤어요. 지수 씨（',a:')?',ans:'는요',h:'は？（チスさん）',d:['은요','도요','가요'],full:'저는 영화를 봤어요. 지수 씨는요?',note:'〜는/은요？：〜は？되묻는 표현'},
+  {b:'저는 도서관에 갔어요. 우에다 씨（',a:')?',ans:'는요',h:'は？（上田さん）',d:['은요','도요','이에요'],full:'저는 도서관에 갔어요. 우에다 씨는요?',note:'우에다 씨(받침なし→씨)→는요？'},
+]},
+/* 10과 */
+{num:10,title:'이 바지 얼마예요?',gram:'〜예요/이에요 / 〜가/이 아니에요 / 〜(으)세요 / 〜하고',qs:[
+  {b:'이 바지 얼마（',a:')?',ans:'예요',h:'ですか（値段）',d:['이에요','입니까','입니다'],full:'이 바지 얼마예요?',note:'얼마예요？：いくらですか'},
+  {b:'이만 원（',a:'）.',ans:'이에요',h:'です（2万ウォン）',d:['예요','입니다','이에요?'],full:'이만 원이에요.',note:'원(받침あり)→이에요'},
+  {b:'오천 원（',a:'）.',ans:'이에요',h:'です（5千ウォン）',d:['예요','입니다','이에요?'],full:'오천 원이에요.',note:'숫자+원+이에요'},
+  {b:'이 치마는 제 거가（',a:'）.',ans:'아니에요',h:'ではありません',d:['있어요','없어요','이에요'],full:'이 치마는 제 거가 아니에요.',note:'거(받침なし)→가 아니에요'},
+  {b:'이쪽으로（',a:'）.',ans:'오세요',h:'いらしてください',d:['가세요','보세요','오십시오'],full:'이쪽으로 오세요.',note:'오다→오세요(尊敬命令)'},
+  {b:'여기（',a:'）.',ans:'앉으세요',h:'お座りください',d:['오세요','보세요','가세요'],full:'여기 앉으세요.',note:'앉다(받침あり)→앉으세요'},
+  {b:'사과（',a:'） 바나나를 사요.',ans:'하고',h:'と（リンゴ）',d:['와','과','도'],full:'사과하고 바나나를 사요.',note:'〜하고：〜と(並列・口語)'},
+  {b:'바지（',a:'） 치마를 봐요.',ans:'하고',h:'と（ズボン）',d:['와','과','도'],full:'바지하고 치마를 봐요.',note:'쇼핑 장면의 병렬 표현'},
+  {b:'이 옷은 얼마（',a:')?',ans:'예요',h:'ですか（服）',d:['이에요','입니까','입니다'],full:'이 옷은 얼마예요?',note:'얼마예요？로 가격을 물어본다'},
+  {b:'모두 얼마（',a:')?',ans:'예요',h:'ですか（全部で）',d:['이에요','입니까','입니다'],full:'모두 얼마예요?',note:'모두(全部で)얼마예요？：お会計'},
+]},
+/* 11과 */
+{num:11,title:'아르바이트는 몇 시부터예요?',gram:'〜부터〜까지 / 〜(으)니까 / 〜ㄹ게요 / 〜(으)로',qs:[
+  {b:'알바는 몇 시（',a:')?',ans:'부터예요',h:'からですか',d:['까지예요','이에요','예요'],full:'알바는 몇 시부터예요?',note:'〜부터：〜から(起点)'},
+  {b:'세 시（',a:'） 여섯 시까지예요.',ans:'부터',h:'から（3時）',d:['까지','에','에서'],full:'세 시부터 여섯 시까지예요.',note:'세 시(3時)부터 여섯 시(6時)까지'},
+  {b:'월요일（',a:'） 금요일까지 수업이 있어요.',ans:'부터',h:'から（月曜日）',d:['까지','에','에서'],full:'월요일부터 금요일까지 수업이 있어요.',note:'요일 범위 표현'},
+  {b:'배가 고프（',a:'） 밥을 먹어요.',ans:'니까',h:'ので（お腹が空いた）',d:['어서','지만','고'],full:'배가 고프니까 밥을 먹어요.',note:'〜(으)니까：主観的理由'},
+  {b:'바쁘（',a:'） 못 가요.',ans:'니까',h:'ので（忙しい）',d:['어서','지만','고'],full:'바쁘니까 못 가요.',note:'바쁘다→바쁘니까'},
+  {b:'제가（',a:'）.',ans:'낼게요',h:'おごります',d:['내요','냈어요','내겠어요'],full:'제가 낼게요.',note:'내다→낼게요。〜ㄹ게요：意志・約束'},
+  {b:'내일 열심히（',a:'）.',ans:'공부할게요',h:'勉強します（約束）',d:['공부해요','공부했어요','공부하겠어요'],full:'내일 열심히 공부할게요.',note:'공부하다→공부할게요'},
+  {b:'버스（',a:'） 가요.',ans:'로',h:'で（バス）',d:['에','에서','와'],full:'버스로 가요.',note:'버스(받침なし)→버스로'},
+  {b:'지하철（',a:'） 와요.',ans:'로',h:'で（地下鉄）',d:['에','에서','와'],full:'지하철로 와요.',note:'지하철(받침あり)→지하철로'},
+  {b:'한국어（',a:'） 이야기해요.',ans:'로',h:'で（韓国語）',d:['에','에서','를'],full:'한국어로 이야기해요.',note:'한국어로：언어를 나타내는 로/으로'},
+]},
+/* 12과 */
+{num:12,title:'사진 보여 주세요.',gram:'〜아/어/여서 / 〜아/어/여 주세요 / 〜(으)로',qs:[
+  {b:'사진（',a:'） 주세요.',ans:'보여',h:'見せて',d:['봐','보고','봐서'],full:'사진 보여 주세요.',note:'보이다→보여 주세요'},
+  {b:'천천히（',a:'） 주세요.',ans:'말해',h:'話して',d:['말하고','말해서','말하지'],full:'천천히 말해 주세요.',note:'말하다→말해 주세요'},
+  {b:'한국어로（',a:'） 주세요.',ans:'써',h:'書いて',d:['쓰고','써서','쓰지'],full:'한국어로 써 주세요.',note:'쓰다→써 주세요'},
+  {b:'문을（',a:'） 주세요.',ans:'열어',h:'開けて',d:['열고','열어서','열지'],full:'문을 열어 주세요.',note:'열다→열어 주세요'},
+  {b:'좀（',a:'） 주세요.',ans:'도와',h:'手伝って',d:['돕고','도와서','돕지'],full:'좀 도와 주세요.',note:'돕다→도와 주세요(ㅂ変則)'},
+  {b:'이쪽（',a:'） 오세요.',ans:'으로',h:'へ（こちらへ）',d:['에서','와','에'],full:'이쪽으로 오세요.',note:'이쪽으로：방향을 나타내는 (으)로'},
+  {b:'왼쪽（',a:'） 가세요.',ans:'으로',h:'へ（左）',d:['에서','와','에'],full:'왼쪽으로 가세요.',note:'왼쪽(左)으로'},
+  {b:'피곤（',a:'） 일찍 잤어요.',ans:'해서',h:'疲れて（だから）',d:['하고','하지만','하니까'],full:'피곤해서 일찍 잤어요.',note:'피곤하다→피곤해서'},
+  {b:'배가 아파（',a:'） 병원에 갔어요.',ans:'서',h:'お腹が痛くて',d:['고','지만','도'],full:'배가 아파서 병원에 갔어요.',note:'아프다→아파서'},
+  {b:'이유가（',a:'） 이쪽으로 와 주세요.',ans:'있어서',h:'あって（理由が）',d:['있고','있지만','있으니까'],full:'이유가 있어서 이쪽으로 와 주세요.',note:'있다→있어서'},
+]},
+/* 13과 */
+{num:13,title:'김치찌개를 먹고 싶어요.',gram:'〜(으)ㄹ까요 / 〜(으)ㅂ시다 / 〜고 싶다 / 〜지만 / 〜(으)러',qs:[
+  {b:'김치찌개를 먹고（',a:'）.',ans:'싶어요',h:'食べたいです',d:['싶었어요','싶습니다','싶어요?'],full:'김치찌개를 먹고 싶어요.',note:'〜고 싶다：〜したい'},
+  {b:'한국에 가고（',a:'）.',ans:'싶어요',h:'行きたいです',d:['싶었어요','싶습니다','싶어요?'],full:'한국에 가고 싶어요.',note:'가다→가고 싶어요'},
+  {b:'같이 영화（',a:')?',ans:'볼까요',h:'見ましょうか',d:['봅시다','봐요','보겠어요'],full:'같이 영화 볼까요?',note:'〜(으)ㄹ까요？：〜しましょうか(提案)'},
+  {b:'노래방에（',a:')?',ans:'갈까요',h:'行きましょうか',d:['갑시다','가요','가겠어요'],full:'노래방에 갈까요?',note:'가다→갈까요？'},
+  {b:'같이（',a:'）!',ans:'갑시다',h:'行きましょう',d:['가요','갈까요','가겠어요'],full:'같이 갑시다!',note:'〜(으)ㅂ시다：〜しましょう(格式勧誘)'},
+  {b:'같이 밥（',a:'）!',ans:'먹읍시다',h:'食べましょう',d:['먹어요','먹을까요','먹겠어요'],full:'같이 밥 먹읍시다!',note:'먹다(받침あり)→먹읍시다'},
+  {b:'비싸（',a:'） 맛있어요.',ans:'지만',h:'ですが（高い）',d:['고','서','도'],full:'비싸지만 맛있어요.',note:'〜지만：〜だが(逆接)'},
+  {b:'맵（',a:'） 맛있어요.',ans:'지만',h:'ですが（辛い）',d:['고','서','도'],full:'맵지만 맛있어요.',note:'맵다→맵지만'},
+  {b:'뭐（',a:'） 왔어요?',ans:'하러',h:'しに（来た）',d:['해서','하고','하지만'],full:'뭐 하러 왔어요?',note:'〜(으)러：目的(〜しに)'},
+  {b:'한국어를 배우（',a:'） 왔어요.',ans:'러',h:'学びに（来た）',d:['어서','고','지만'],full:'한국어를 배우러 왔어요.',note:'배우다→배우러 왔어요'},
+]},
+];
+
+/* ════════════════════════════════════════════
+   ★ Google Apps Script URL
+   　 後で先生のURLを貼り付けてください
+   ════════════════════════════════════════════ */
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzKDDICdAdlpSiU9U-8Oa0NnjOR0--qx0vzFs96O5g__ENkZaRdcUOKAxhyP33-Zg/exec';
+
+/* ── 状態変数 ── */
+let cur=0, qi=0, qs=0, qo=[], answered=false;
+let studentId='', sessionId='', sessionStart=0, qStart=0;
+let sessionLog=[];   // 送信待ちログをここに蓄積
+const done={};
+
+/* ── ユーティリティ ── */
+function sh(a){let r=[...a];for(let i=r.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function nowStr(){return new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'});}
+function genSession(){return Date.now().toString(36).toUpperCase();}
+
+/* ════════════════════════════════════
+   ログイン / ログアウト
+   ════════════════════════════════════ */
+function doLogin(){
+  const v = document.getElementById('code-input').value.trim();
+  const n = parseInt(v);
+  if(!v || isNaN(n) || n<1 || n>99){
+    document.getElementById('login-err').style.display='block';
+    return;
+  }
+  studentId = 'P' + String(n).padStart(2,'0');
+  sessionId = genSession();
+  sessionStart = Date.now();
+
+  // 画面切替
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-screen').style.display='block';
+  document.getElementById('ub-id-text').textContent = studentId + ' さん';
+  document.getElementById('ub-session-text').textContent =
+    'セッション開始: ' + nowStr();
+
+  // セッション開始ログ送信
+  sendLog({
+    type:'SESSION_START', student:studentId, session:sessionId,
+    timestamp:nowStr(), lessonNum:'', questionNum:'',
+    correct:'', answer:'', rt_ms:'', score:''
+  });
+
+  grids(); rb(); ui(); sel(0);
+}
+
+function doLogout(){
+  // セッション終了ログ
+  const elapsed = Math.round((Date.now()-sessionStart)/1000);
+  sendLog({
+    type:'SESSION_END', student:studentId, session:sessionId,
+    timestamp:nowStr(), lessonNum:'', questionNum:'',
+    correct:'', answer:'', rt_ms:'', score:String(elapsed)+'sec'
+  });
+  // リセット
+  studentId=''; sessionId=''; sessionLog=[];
+  Object.keys(done).forEach(k=>delete done[k]);
+  document.getElementById('main-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('code-input').value='';
+  document.getElementById('login-err').style.display='none';
+}
+
+/* ════════════════════════════════════
+   Google Sheets ログ送信 (GET方式)
+   ════════════════════════════════════ */
+function sendLog(data){
+  if(!GAS_URL){ console.log('[LOG]', data); return; }
+  const encoded = encodeURIComponent(JSON.stringify(data));
+  const url = GAS_URL + '?data=' + encoded;
+  fetch(url, { method:'GET', mode:'no-cors' })
+    .catch(()=>{ sessionLog.push(data); });
+}
+
+// オフライン時に蓄積したログを再送
+function flushLog(){
+  if(!GAS_URL || sessionLog.length===0) return;
+  const batch=[...sessionLog]; sessionLog=[];
+  batch.forEach(d=>sendLog(d));
+}
+window.addEventListener('online', flushLog);
+
+/* ════════════════════════════════════
+   学習画面ロジック
+   ════════════════════════════════════ */
+function grids(){
+  ['ga','gb'].forEach(id=>document.getElementById(id).innerHTML='');
+  L.forEach((l,i)=>{
+    const b=document.createElement('button');
+    b.className='lbtn'+(i===cur?' active':'')+(done[i]?' done':'');
+    b.innerHTML='第'+l.num+'課';
+    b.onclick=()=>sel(i);
+    document.getElementById(i<6?'ga':'gb').appendChild(b);
+  });
+}
+
+function sel(i){
+  cur=i; qi=0; qs=0; answered=false;
+  qo=sh([...Array(L[i].qs.length).keys()]);
+  grids(); rb(); ui(); loadQ();
+}
+
+function ui(){
+  const l=L[cur];
+  document.getElementById('li-n').textContent='第'+l.num+'課';
+  document.getElementById('li-t').textContent=l.title;
+  document.getElementById('li-g').textContent=l.gram;
+  document.getElementById('sc-v').textContent='0';
+}
+
+function loadQ(){
+  const l=L[cur];
+  if(qi>=l.qs.length){fin();return;}
+  answered=false;
+  qStart=Date.now(); // ★ 反応時間計測開始
+  document.getElementById('fb').className='fb';
+  document.getElementById('nb').classList.remove('show');
+  const q=l.qs[qo[qi]];
+  document.getElementById('ht').textContent=q.h;
+  document.getElementById('qk').innerHTML=q.b+'<span class="bl" id="bl">（　　　）</span>'+q.a;
+  const opts=sh([q.ans,...q.d]);
+  const c=document.getElementById('os'); c.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button'); b.className='ob'; b.textContent=o;
+    b.onclick=()=>chk(o,q,b,c); c.appendChild(b);
+  });
+  document.getElementById('pf').style.width=((qi/l.qs.length)*100)+'%';
+  document.getElementById('cnt').textContent=(qi+1)+' / '+l.qs.length;
+  document.getElementById('ts').textContent=qs+'点';
+}
+
+function chk(sel,q,btn,c){
+  if(answered)return; answered=true;
+  const rt = Date.now()-qStart; // ★ 反応時間(ms)
+  const isOk = sel===q.ans;
+  const bl=document.getElementById('bl'), fb=document.getElementById('fb');
+  c.querySelectorAll('.ob').forEach(b=>{
+    b.classList.add('used');
+    if(b.textContent===q.ans) b.classList.add('co');
+  });
+  if(isOk){
+    bl.textContent=sel; bl.className='bl ok';
+    qs+=10;
+    document.getElementById('sc-v').textContent=qs;
+    document.getElementById('ts').textContent=qs+'点';
+    fb.className='fb show ok';
+    document.getElementById('fbf').textContent='正解！　'+q.full;
+  } else {
+    bl.textContent=sel; bl.className='bl ng';
+    fb.className='fb show ng';
+    document.getElementById('fbf').textContent='不正解。正解は「'+q.ans+'」です。　'+q.full;
+  }
+  document.getElementById('fbn').textContent=q.note;
+  document.getElementById('nb').classList.add('show');
+
+  // ★ ログ送信
+  sendLog({
+    type:'ANSWER',
+    student: studentId,
+    session: sessionId,
+    timestamp: nowStr(),
+    lessonNum: L[cur].num,
+    questionNum: qo[qi]+1,
+    questionText: q.b+'（　）'+q.a,
+    correct: isOk ? '1' : '0',
+    answer: sel,
+    correctAnswer: q.ans,
+    rt_ms: rt,
+    score: qs
+  });
+}
+
+function nxt(){qi++; loadQ();}
+
+function fin(){
+  const l=L[cur]; done[cur]=true; grids();
+  const ni=cur+1<L.length?cur+1:-1;
+  // ★ 課完了ログ
+  sendLog({
+    type:'LESSON_COMPLETE', student:studentId, session:sessionId,
+    timestamp:nowStr(), lessonNum:l.num, questionNum:'',
+    correct:'', answer:'', rt_ms:'', score:qs
+  });
+  document.getElementById('body').innerHTML=`
+    <div class="fin">
+      <h3>第${l.num}課 完了！</h3>
+      <div class="big">${qs} <span style="font-size:16px;color:#666;">/ ${l.qs.length*10}点</span></div>
+      <p class="gram">${l.gram}</p>
+      <div class="fbs">
+        <button class="fr" onclick="retry()">もう一度</button>
+        ${ni>=0?`<button class="fn" onclick="gn(${ni})">第${L[ni].num}課へ →</button>`:''}
+      </div>
+    </div>
+    <div class="tip"><p>間違えた問題は「もう一度」で復習しましょう。</p></div>`;
+}
+
+function retry(){rb();sel(cur);}
+function gn(i){rb();sel(i);}
+
+function rb(){
+  document.getElementById('body').innerHTML=`
+    <div class="li" id="li">
+      <div><div class="li-n" id="li-n"></div><div class="li-t" id="li-t"></div><div class="li-g" id="li-g"></div></div>
+      <div class="sc"><div class="sc-v" id="sc-v">0</div><div class="sc-l">点</div></div>
+    </div>
+    <div class="pr"><span id="cnt"></span><span id="ts" style="font-size:11px;color:#1D9E75;font-weight:500;"></span></div>
+    <div class="pb"><div class="pf" id="pf" style="width:0%"></div></div>
+    <div class="hc"><span class="hl">ヒント</span><span id="ht">—</span></div>
+    <div class="qc"><div class="qk" id="qk"></div><div class="os" id="os"></div></div>
+    <div class="fb" id="fb"><div class="fb-f" id="fbf"></div><div class="fb-n" id="fbn"></div></div>
+    <button class="nb" id="nb" onclick="nxt()">次の問題 →</button>
+    <div class="tip"><p>（　）に入る韓国語を選んでください。ヒントは空欄に入る語の日本語の意味です。</p></div>`;
+}
+</script>
+</body>
+</html>
