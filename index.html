@@ -633,6 +633,7 @@
     <div class="class-btns">
       <button class="class-btn" onclick="selectClass('A')">A반</button>
       <button class="class-btn" onclick="selectClass('B')">B반</button>
+      <button class="class-btn" onclick="selectClass('T')" style="background:var(--accent-soft);color:var(--accent);">T반</button>
     </div>
 
     <div class="num-label">出席番号 / 출석번호</div>
@@ -826,7 +827,7 @@
    설정
 ════════════════════════════════════════════════════════ */
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzKDDICdAdlpSiU9U-8Oa0NnjOR0--qx0vzFs96O5g__ENkZaRdcUOKAxhyP33-Zg/exec';
-const CLASS_MAX = { A: 35, B: 28 };
+const CLASS_MAX = { A: 35, B: 28, T: 9 }; // T01~T09: 선생님
 const Q_PER_SESSION      = 10;  // 문법·철자: 10문항
 const V_PER_SESSION      = 8;   // 어휘: 8문항（Miller's 7±2 法則）
 
