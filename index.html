@@ -201,6 +201,18 @@
 
   .top-bar-sep { flex: 1; }
 
+  .logout-btn {
+    font-size: 12px; font-weight: 600;
+    color: var(--gray-mid);
+    background: var(--gray-bg);
+    border: 1.5px solid var(--gray-line);
+    padding: 4px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:active { opacity: 0.7; }
+
   .score-badge {
     font-size: 13px; font-weight: 700;
     color: var(--white);
@@ -645,6 +657,7 @@
     <div class="top-bar-id" id="ub-id">—</div>
     <div class="top-bar-sep"></div>
     <div class="score-badge" id="ub-score">0점</div>
+    <button class="logout-btn" onclick="doLogout()">ログアウト</button>
   </div>
 
   <!-- 탭 바 -->
@@ -2360,6 +2373,26 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+function doLogout() {
+  const now = Date.now();
+  const elapsed = Math.round((now - sessionStart) / 1000);
+  sendLog({
+    type: 'session_end',
+    tab: activeTab,
+    totalScore: totalScore,
+    sessionDuration: elapsed
+  });
+  setTimeout(() => {
+    studentId = ''; sessionId = ''; sessionStart = 0;
+    totalScore = 0; gScore = 0; vScore = 0; spScore = 0;
+    document.getElementById('ub-id').textContent = '—';
+    document.getElementById('ub-score').textContent = '0점';
+    document.getElementById('login-id').value = '';
+    document.getElementById('main-screen').classList.remove('active');
+    document.getElementById('login-screen').classList.add('active');
+  }, 300);
 }
 
 function sendLog(data) {
