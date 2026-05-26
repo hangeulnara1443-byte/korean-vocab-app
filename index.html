@@ -768,6 +768,16 @@
 
   <!-- ── 철자 탭 ── -->
   <div id="tab-spell" class="tab-content">
+    <!-- 테스트 어휘 집중 모드 버튼 -->
+    <div style="margin-bottom:12px">
+      <button id="test-mode-btn" onclick="startTestMode()"
+        style="width:100%;padding:12px;border-radius:12px;border:2px solid var(--accent);
+               background:var(--accent-soft);color:var(--accent);font-size:15px;
+               font-weight:700;cursor:pointer;letter-spacing:0.3px;">
+        📝 テスト語彙 24語 集中練習
+      </button>
+    </div>
+
     <!-- 과 선택 -->
     <div>
       <div class="section-title">과 선택 / 課選択</div>
@@ -785,7 +795,7 @@
     <!-- 철자 문제 카드 -->
     <div class="q-card" id="sp-q-card">
       <div class="q-meta">
-        <span class="q-tag spell">철자</span>
+        <span class="q-tag spell" id="sp-mode-tag">철자</span>
         <span class="q-num" id="sp-q-num">1/10</span>
       </div>
 
@@ -813,10 +823,16 @@
     <!-- 결과 카드 -->
     <div class="result-card" id="sp-result">
       <div class="result-emoji" id="sp-result-emoji">🎉</div>
-      <div class="result-title">완료!</div>
+      <div class="result-title" id="sp-result-title">완료!</div>
       <div class="result-score" id="sp-result-score"></div>
       <div class="result-sub" id="sp-result-sub"></div>
-      <button class="retry-btn" onclick="retrySpell()">다시 풀기</button>
+      <button class="retry-btn" id="sp-retry-btn" onclick="retrySpell()">もう一度練習する</button>
+      <button id="sp-quit-btn" onclick="quitTestMode()"
+        style="display:none;margin-top:8px;width:100%;padding:10px;border-radius:10px;
+               border:1px solid var(--gray-mid);background:transparent;
+               color:var(--gray-mid);font-size:14px;cursor:pointer;">
+        終わる
+      </button>
     </div>
   </div>
 
@@ -1939,6 +1955,10 @@ const VOCAB_DATA = {
       choices:['시계','카메라','컴퓨터','전화'], answer:'시계' },
     { type:'jp2kr', kr:'노트',     jp:'ノート',
       choices:['노트','연필','사전','책'], answer:'노트' },
+    { type:'kr2jp', kr:'가다',    jp:'行く',
+      choices:['行く','来る','食べる','見る'], answer:'行く' },
+    { type:'jp2kr', kr:'가다',    jp:'行く',
+      choices:['가다','오다','먹다','보다'], answer:'가다' },
   ],
   11: [
     { type:'kr2jp', kr:'달',       jp:'～月（助数詞）',
@@ -2155,6 +2175,26 @@ const VOCAB_DATA = {
       choices:['어떻게', '왜', '언제', '어디'], answer:'어떻게' },
     { type:'jp2kr', kr:'아니요', jp:'いいえ',
       choices:['아니요', '네', '예', '좋아요'], answer:'아니요' },
+    { type:'kr2jp', kr:'살다',  jp:'住む・暮らす',
+      choices:['住む・暮らす','行く','来る','食べる'], answer:'住む・暮らす' },
+    { type:'kr2jp', kr:'있다',  jp:'ある・いる',
+      choices:['ある・いる','ない・いない','行く','来る'], answer:'ある・いる' },
+    { type:'kr2jp', kr:'없다',  jp:'ない・いない',
+      choices:['ない・いない','ある・いる','行く','食べる'], answer:'ない・いない' },
+    { type:'kr2jp', kr:'숙제',  jp:'宿題',
+      choices:['宿題','授業','約束','本'], answer:'宿題' },
+    { type:'kr2jp', kr:'사람',  jp:'人',
+      choices:['人','友達','先生','学生'], answer:'人' },
+    { type:'jp2kr', kr:'살다',  jp:'住む・暮らす',
+      choices:['살다','가다','오다','만나다'], answer:'살다' },
+    { type:'jp2kr', kr:'있다',  jp:'ある・いる',
+      choices:['있다','없다','가다','오다'], answer:'있다' },
+    { type:'jp2kr', kr:'없다',  jp:'ない・いない',
+      choices:['없다','있다','가다','오다'], answer:'없다' },
+    { type:'jp2kr', kr:'숙제',  jp:'宿題',
+      choices:['숙제','수업','약속','책'], answer:'숙제' },
+    { type:'jp2kr', kr:'사람',  jp:'人',
+      choices:['사람','친구','선생님','학생'], answer:'사람' },
   ],
   8: [
     { type:'kr2jp', kr:'아버님',   jp:'お父様（尊敬）',
@@ -2198,6 +2238,18 @@ const VOCAB_DATA = {
       choices:['오빠', '언니', '형', '누나'], answer:'오빠' },
     { type:'jp2kr', kr:'언니', jp:'お姉さん（女性から見た）',
       choices:['언니', '오빠', '형', '누나'], answer:'언니' },
+    { type:'kr2jp', kr:'오다',  jp:'来る',
+      choices:['来る','行く','食べる','見る'], answer:'来る' },
+    { type:'kr2jp', kr:'사다',  jp:'買う',
+      choices:['買う','売る','見る','読む'], answer:'買う' },
+    { type:'kr2jp', kr:'친구',  jp:'友達',
+      choices:['友達','先生','家族','学生'], answer:'友達' },
+    { type:'jp2kr', kr:'오다',  jp:'来る',
+      choices:['오다','가다','먹다','보다'], answer:'오다' },
+    { type:'jp2kr', kr:'사다',  jp:'買う',
+      choices:['사다','읽다','보다','만나다'], answer:'사다' },
+    { type:'jp2kr', kr:'친구',  jp:'友達',
+      choices:['친구','선생님','가족','학생'], answer:'친구' },
   ],
   9: [
     { type:'kr2jp', kr:'선물',     jp:'プレゼント・贈り物',
@@ -2241,6 +2293,10 @@ const VOCAB_DATA = {
       choices:['받다', '주다', '빌리다', '사다'], answer:'받다' },
     { type:'jp2kr', kr:'축하합니다', jp:'おめでとうございます',
       choices:['축하합니다', '감사합니다', '미안합니다', '실례합니다'], answer:'축하합니다' },
+    { type:'kr2jp', kr:'가방',  jp:'かばん',
+      choices:['かばん','本','家','コーヒー'], answer:'かばん' },
+    { type:'jp2kr', kr:'가방',  jp:'かばん',
+      choices:['가방','책','집','커피'], answer:'가방' },
   ],
   10: [
     { type:'kr2jp', kr:'기숙사',   jp:'寮・寄宿舎',
@@ -2327,6 +2383,18 @@ const VOCAB_DATA = {
       choices:['물', '주스', '커피', '차'], answer:'물' },
     { type:'jp2kr', kr:'과자', jp:'お菓子',
       choices:['과자', '빵', '밥', '국'], answer:'과자' },
+    { type:'kr2jp', kr:'먹다',     jp:'食べる',
+      choices:['食べる','飲む','見る','読む'], answer:'食べる' },
+    { type:'kr2jp', kr:'마시다',   jp:'飲む',
+      choices:['飲む','食べる','買う','会う'], answer:'飲む' },
+    { type:'kr2jp', kr:'공부하다', jp:'勉強する',
+      choices:['勉強する','食べる','見る','来る'], answer:'勉強する' },
+    { type:'jp2kr', kr:'먹다',     jp:'食べる',
+      choices:['먹다','마시다','보다','읽다'], answer:'먹다' },
+    { type:'jp2kr', kr:'마시다',   jp:'飲む',
+      choices:['마시다','먹다','사다','보다'], answer:'마시다' },
+    { type:'jp2kr', kr:'공부하다', jp:'勉強する',
+      choices:['공부하다','만나다','살다','보다'], answer:'공부하다' },
   ],
 };
 
@@ -2904,6 +2972,33 @@ const SPELL_DATA = {
       wrongJamos: ['ㄴ','ㅜ','ㅗ','ㅏ']
     },
   ],
+  7: [
+    {
+      jp: '宿題', kr: '숙제',
+      // ㅡ↔ㅜ(모음혼동), ㅈ↔ㅊ(격음혼동)
+      wrongJamos: ['ㅜ','ㅊ']
+    },
+    {
+      jp: '人', kr: '사람',
+      // ㅆ↔ㅅ(경음혼동), ㅏ↔ㅓ(모음혼동)
+      wrongJamos: ['ㅆ','ㅓ']
+    },
+    {
+      jp: '住む・暮らす', kr: '살다',
+      // ㅆ↔ㅅ(경음혼동), ㅏ↔ㅓ(모음혼동)
+      wrongJamos: ['ㅆ','ㅓ']
+    },
+    {
+      jp: 'ある・いる', kr: '있다',
+      // ㅣ↔ㅡ(모음혼동), ㅅ↔ㅆ(경음혼동)
+      wrongJamos: ['ㅡ','ㅆ']
+    },
+    {
+      jp: 'ない・いない', kr: '없다',
+      // ㅓ↔ㅏ(모음혼동), ㅂ↔ㅍ(격음혼동)
+      wrongJamos: ['ㅏ','ㅍ']
+    },
+  ],
   5: [
     {
       jp: '辞書', kr: '사전',
@@ -2954,6 +3049,16 @@ const SPELL_DATA = {
       jp: '消しゴム', kr: '지우개',
       // ㅊ(격음), ㅡ↔ㅣ, ㅗ↔ㅜ, ㅔ↔ㅐ
       wrongJamos: ['ㅊ','ㅡ','ㅗ','ㅔ']
+    },
+    {
+      jp: '行く', kr: '가다',
+      // ㄲ↔ㄱ(경음혼동), ㅏ↔ㅓ(모음혼동)
+      wrongJamos: ['ㄲ','ㅓ']
+    },
+    {
+      jp: '来る', kr: '오다',
+      // ㅗ↔ㅓ(모음혼동), ㅂ↔ㅍ(격음혼동)
+      wrongJamos: ['ㅗ','ㅍ']
     },
   ],
   11: [
@@ -3056,7 +3161,13 @@ const SPELL_DATA = {
     { jp: '勤務する',             kr: '근무하다',
       wrongJamos: ['ㅋ', 'ㅓ'] },
     { jp: 'ソウル',               kr: '서울',
-      wrongJamos: ['ㅆ', 'ㅗ'] },
+      wrongJamos: ['ㅆ', 'ㅗ']
+        },
+    {
+      jp: '友達', kr: '친구',
+      // ㅈ↔ㅊ(격음혼동), ㅣ↔ㅡ(모음혼동)
+      wrongJamos: ['ㅈ','ㅡ']
+    },
   ],
   9: [
     { jp: 'プレゼント・贈り物',   kr: '선물',
@@ -3153,6 +3264,21 @@ const SPELL_DATA = {
       // ㅆ(경음), ㅓ↔ㅏ, ㅊ(격음), ㄹ↔ㄴ
       wrongJamos: ['ㅆ','ㅓ','ㅊ','ㄹ']
     },
+    {
+      jp: '本', kr: '책',
+      // ㅈ↔ㅊ(격음혼동), ㅔ↔ㅐ(모음혼동)
+      wrongJamos: ['ㅈ','ㅐ']
+    },
+    {
+      jp: 'ご飯', kr: '밥',
+      // ㅍ↔ㅂ(격음혼동), ㅓ↔ㅏ(모음혼동)
+      wrongJamos: ['ㅍ','ㅓ']
+    },
+    {
+      jp: 'コーヒー', kr: '커피',
+      // ㄱ↔ㅋ(격음혼동), ㅓ↔ㅗ(모음혼동)
+      wrongJamos: ['ㄱ','ㅗ']
+    },
   ]
 };
 
@@ -3199,6 +3325,10 @@ function renderSpellQ() {
   document.getElementById('sp-feedback').className = 'feedback-box';
   document.getElementById('sp-next-btn').classList.remove('visible');
   document.getElementById('sp-q-num').textContent = `${spIdx + 1}/${spQueue.length}`;
+
+  // 집중 모드 태그 표시
+  document.getElementById('sp-mode-tag').textContent =
+    spTestMode ? `📝 第${spSessionCount}回` : '철자';
 
   const pct = (spIdx / spQueue.length) * 100;
   document.getElementById('sp-prog-bar').style.width = pct + '%';
@@ -3375,7 +3505,21 @@ function showSpellResult() {
   const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
   document.getElementById('sp-result-emoji').textContent = emoji;
   document.getElementById('sp-result-score').textContent = `${spScore} / ${spQueue.length}`;
-  document.getElementById('sp-result-sub').textContent   = `정답률 ${pct}% · ${spLesson}과 철자`;
+
+  if (spTestMode) {
+    // 집중 모드 결과
+    document.getElementById('sp-result-title').textContent = 'テスト語彙 完了！';
+    document.getElementById('sp-result-sub').textContent =
+      `正答率 ${pct}%・第${spSessionCount}回目 ｜ もう一度で語順ランダム`;
+    document.getElementById('sp-retry-btn').textContent = 'もう一度練習する';
+    document.getElementById('sp-quit-btn').style.display = '';
+  } else {
+    // 일반 모드 결과
+    document.getElementById('sp-result-title').textContent = '완료!';
+    document.getElementById('sp-result-sub').textContent = `정답률 ${pct}% · ${spLesson}과 철자`;
+    document.getElementById('sp-retry-btn').textContent = '다시 풀기';
+    document.getElementById('sp-quit-btn').style.display = 'none';
+  }
 
   document.getElementById('sp-prog-bar').style.width = '100%';
   document.getElementById('sp-prog-txt').textContent = `${spQueue.length}/${spQueue.length}`;
@@ -3389,9 +3533,81 @@ function showSpellResult() {
   });
 }
 
-function retrySpell() {
+// ── 테스트 어휘 24개 집중 모드 ──
+const TEST_VOCAB_24 = [
+  '가다','오다','먹다','마시다','보다','읽다','만나다','사다','살다','공부하다','있다','없다',
+  '학교','친구','수업','숙제','책','집','밥','커피','가방','사람','약속','오후'
+];
+
+let spTestMode = false;  // 집중 모드 여부
+let spSessionCount = 0;  // 이번 집중 모드 세션 횟수
+
+function startTestMode() {
+  spTestMode = true;
+  spSessionCount = 1;
+
+  // 과 선택 버튼 비활성화 표시
+  document.querySelectorAll('#spell-lesson-grid .lesson-chip').forEach(b => {
+    b.classList.remove('selected');
+  });
+  document.getElementById('test-mode-btn').style.background = 'var(--accent)';
+  document.getElementById('test-mode-btn').style.color = '#fff';
+
+  // 24개 어휘를 SPELL_DATA에서 수집
+  const pool = buildTestPool();
+  if (!pool.length) { alert('テストデータが見つかりません'); return; }
+
+  spQueue = shuffle(pool);
+  spIdx = 0; spScore = 0; spAnswered = false;
+
+  document.getElementById('sp-result').classList.remove('visible');
   document.getElementById('sp-q-card').style.display = '';
-  initSpell();
+  document.getElementById('sp-next-btn').classList.remove('visible');
+
+  renderSpellQ();
+}
+
+function buildTestPool() {
+  // 모든 SPELL_DATA에서 TEST_VOCAB_24에 해당하는 항목만 수집
+  const pool = [];
+  Object.values(SPELL_DATA).forEach(lessonArr => {
+    lessonArr.forEach(item => {
+      if (TEST_VOCAB_24.includes(item.kr)) pool.push(item);
+    });
+  });
+  return pool;
+}
+
+function retrySpell() {
+  if (spTestMode) {
+    // 집중 모드: 랜덤 재시작
+    spSessionCount++;
+    const pool = buildTestPool();
+    spQueue = shuffle(pool);
+    spIdx = 0; spScore = 0; spAnswered = false;
+
+    document.getElementById('sp-result').classList.remove('visible');
+    document.getElementById('sp-q-card').style.display = '';
+    document.getElementById('sp-next-btn').classList.remove('visible');
+    renderSpellQ();
+  } else {
+    // 일반 모드: 기존 동작
+    document.getElementById('sp-q-card').style.display = '';
+    initSpell();
+  }
+}
+
+function quitTestMode() {
+  // 집중 모드 종료 → 일반 모드로 복귀
+  spTestMode = false;
+  spSessionCount = 0;
+  document.getElementById('test-mode-btn').style.background = 'var(--accent-soft)';
+  document.getElementById('test-mode-btn').style.color = 'var(--accent)';
+  document.getElementById('sp-quit-btn').style.display = 'none';
+  document.getElementById('sp-result').classList.remove('visible');
+  document.getElementById('sp-q-card').style.display = '';
+  // 기본 과(4과)로 초기화
+  selectSpellLesson(spLesson);
 }
 
 </script>
