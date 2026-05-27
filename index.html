@@ -664,13 +664,13 @@
   <!-- 탭 바 -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('grammar')">
-      📖 문법·문형
+      📖 文法・文型
     </button>
     <button class="tab-btn" onclick="switchTab('vocab')">
-      📝 어휘
+      📝 語彙
     </button>
     <button class="tab-btn" onclick="switchTab('spell')">
-      🔤 철자
+      🔤 綴り
     </button>
   </div>
 
@@ -703,7 +703,7 @@
     </div>
 
     <!-- 다음 버튼 -->
-    <button class="next-btn" id="g-next-btn" onclick="nextGrammarQ()">다음 문제 →</button>
+    <button class="next-btn" id="g-next-btn" onclick="nextGrammarQ()">次の問題 →</button>
 
     <!-- 결과 카드 -->
     <div class="result-card" id="g-result">
@@ -726,10 +726,10 @@
     <!-- 방향 선택 -->
     <div class="vocab-mode-row">
       <button class="vocab-mode-btn active" id="vmode-kr2jp" onclick="setVocabMode('kr2jp')">
-        🇰🇷→🇯🇵 한국어→일본어
+        🇰🇷→🇯🇵 韓国語→日本語
       </button>
       <button class="vocab-mode-btn" id="vmode-jp2kr" onclick="setVocabMode('jp2kr')">
-        🇯🇵→🇰🇷 일본어→한국어
+        🇯🇵→🇰🇷 日本語→韓国語
       </button>
     </div>
 
@@ -754,7 +754,7 @@
     </div>
 
     <!-- 다음 버튼 -->
-    <button class="next-btn" id="v-next-btn" onclick="nextVocabQ()">다음 문제 →</button>
+    <button class="next-btn" id="v-next-btn" onclick="nextVocabQ()">次の問題 →</button>
 
     <!-- 결과 카드 -->
     <div class="result-card" id="v-result">
@@ -768,19 +768,36 @@
 
   <!-- ── 철자 탭 ── -->
   <div id="tab-spell" class="tab-content">
-    <!-- 테스트 어휘 집중 모드 버튼 -->
-    <div style="margin-bottom:12px">
+
+    <!-- ① 첫 화면: 모드 선택 메뉴 -->
+    <div id="spell-menu">
+      <div class="section-title" style="text-align:center;margin-bottom:16px">
+        綴りの練習
+      </div>
       <button id="test-mode-btn" onclick="startTestMode()"
-        style="width:100%;padding:12px;border-radius:12px;border:2px solid var(--accent);
+        style="width:100%;padding:14px;border-radius:12px;border:2px solid var(--accent);
                background:var(--accent-soft);color:var(--accent);font-size:15px;
-               font-weight:700;cursor:pointer;letter-spacing:0.3px;">
+               font-weight:700;cursor:pointer;letter-spacing:0.3px;margin-bottom:12px;display:block;">
         📝 テスト語彙 24語 集中練習
+      </button>
+      <button onclick="showLessonMenu()"
+        style="width:100%;padding:14px;border-radius:12px;border:2px solid var(--gray-mid);
+               background:#fff;color:var(--gray-dark);font-size:15px;
+               font-weight:700;cursor:pointer;letter-spacing:0.3px;display:block;">
+        📚 課を選んで練習
       </button>
     </div>
 
-    <!-- 과 선택 -->
-    <div>
-      <div class="section-title">과 선택 / 課選択</div>
+    <!-- ② 과 선택 메뉴 (처음엔 숨김) -->
+    <div id="spell-lesson-menu" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button onclick="backToSpellMenu()"
+          style="padding:6px 12px;border-radius:8px;border:1px solid var(--gray-mid);
+                 background:#fff;color:var(--gray-mid);font-size:13px;cursor:pointer;">
+          ← 戻る
+        </button>
+        <div class="section-title" style="margin:0">課選択</div>
+      </div>
       <div class="lesson-grid" id="spell-lesson-grid"></div>
     </div>
 
@@ -808,7 +825,7 @@
       <div class="syllable-boxes" id="sp-boxes"></div>
 
       <!-- 입력한 자모 취소 버튼 -->
-      <button class="delete-btn" id="sp-delete" onclick="deleteJamo()">← 지우기</button>
+      <button class="delete-btn" id="sp-delete" onclick="deleteJamo()">← 削除</button>
 
       <!-- 자모 버튼 패드 -->
       <div class="jamo-pad" id="sp-jamo-pad"></div>
@@ -818,7 +835,7 @@
     </div>
 
     <!-- 다음 버튼 -->
-    <button class="next-btn" id="sp-next-btn" onclick="nextSpellQ()">다음 문제 →</button>
+    <button class="next-btn" id="sp-next-btn" onclick="nextSpellQ()">次の問題 →</button>
 
     <!-- 결과 카드 -->
     <div class="result-card" id="sp-result">
@@ -2535,6 +2552,17 @@ function switchTab(tab) {
   document.getElementById('tab-grammar').classList.toggle('active', tab === 'grammar');
   document.getElementById('tab-vocab').classList.toggle('active',   tab === 'vocab');
   document.getElementById('tab-spell').classList.toggle('active',   tab === 'spell');
+
+  // 철자 탭 전환 시 메뉴 화면으로 초기화
+  if (tab === 'spell') {
+    document.getElementById('spell-menu').style.display = '';
+    document.getElementById('spell-lesson-menu').style.display = 'none';
+    document.getElementById('sp-q-card').style.display = 'none';
+    document.getElementById('sp-next-btn').classList.remove('visible');
+    document.getElementById('sp-result').classList.remove('visible');
+    const pr = document.querySelector('#tab-spell .progress-row');
+    if (pr) pr.style.display = 'none';
+  }
 }
 
 /* ════════════════════════════════════════════════════════
@@ -2663,7 +2691,8 @@ function answerGrammar(chosen, btn, q) {
     timestamp: nowStr(), lessonNum: gLesson, questionNum: gIdx + 1,
     questionText: q.text, correct: correct ? 1 : 0,
     answer: chosen, correctAnswer: q.answer,
-    rt_ms: rt, score: gScore, tab: 'grammar'
+    rt_ms: rt, learningTime: Math.round(rt / 1000),
+    score: gScore, tab: 'grammar'
   });
 }
 
@@ -2796,7 +2825,8 @@ function answerVocab(chosen, btn, q) {
     timestamp: nowStr(), lessonNum: vLesson, questionNum: vIdx + 1,
     questionText: `[${q.type}] ${q.kr} / ${q.jp}`, correct: correct ? 1 : 0,
     answer: chosen, correctAnswer: q.answer,
-    rt_ms: rt, score: vScore, tab: 'vocab'
+    rt_ms: rt, learningTime: Math.round(rt / 1000),
+    score: vScore, tab: 'vocab'
   });
 }
 
@@ -2852,6 +2882,14 @@ const JUNGSEONG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','
 const JONGSEONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 
 // 한글 음절 → 자모 배열로 분해
+// 겹받침 → 두 자모로 분리 (학생 입력과 일치시키기 위함)
+const DOUBLE_JONG = {
+  'ㄳ':['ㄱ','ㅅ'], 'ㄵ':['ㄴ','ㅈ'], 'ㄶ':['ㄴ','ㅎ'],
+  'ㄺ':['ㄹ','ㄱ'], 'ㄻ':['ㄹ','ㅁ'], 'ㄼ':['ㄹ','ㅂ'],
+  'ㄽ':['ㄹ','ㅅ'], 'ㄾ':['ㄹ','ㅌ'], 'ㄿ':['ㄹ','ㅍ'],
+  'ㅀ':['ㄹ','ㅎ'], 'ㅄ':['ㅂ','ㅅ'],
+};
+
 function decomposeChar(ch) {
   const code = ch.charCodeAt(0) - 0xAC00;
   if (code < 0 || code > 11171) return [ch]; // 한글 아닌 문자
@@ -2859,7 +2897,15 @@ function decomposeChar(ch) {
   const jung = ((code - jong) / 28) % 21;
   const cho  = Math.floor((code - jong) / 28 / 21);
   const result = [CHOSEONG[cho], JUNGSEONG[jung]];
-  if (jong > 0) result.push(JONGSEONG[jong]);
+  if (jong > 0) {
+    const jongChar = JONGSEONG[jong];
+    // 겹받침이면 두 자모로 분리
+    if (DOUBLE_JONG[jongChar]) {
+      result.push(...DOUBLE_JONG[jongChar]);
+    } else {
+      result.push(jongChar);
+    }
+  }
   return result;
 }
 
@@ -2893,8 +2939,29 @@ function composeJamos(jamos) {
         // 단, 그 다음(i+3)이 모음이면 종성 아님 (다음 음절의 초성)
         const nextIsV = (i + 3 < jamos.length) && JUNGSEONG.includes(jamos[i+3]);
         if (!nextIsV) {
-          jong = JONGSEONG.indexOf(jamos[i+2]);
-          if (jong > 0) advance = 3;
+          // 겹받침 처리: 두 자음이 DOUBLE_JONG의 값 쌍이면 겹받침으로 조합
+          const j2 = jamos[i+2];
+          const j3 = (i + 3 < jamos.length) ? jamos[i+3] : null;
+          let doubleJong = 0;
+          if (j3 && !JUNGSEONG.includes(j3)) {
+            // j2+j3 → 겹받침 후보
+            const pair = [j2, j3].join('');
+            const doubleMap = {'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ',
+                               'ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+            if (doubleMap[pair] && JONGSEONG.includes(doubleMap[pair])) {
+              const dIdx = JONGSEONG.indexOf(doubleMap[pair]);
+              // 그 다음(i+4)이 모음이면 겹받침 아님
+              const afterDouble = (i + 4 < jamos.length) ? jamos[i+4] : null;
+              if (!afterDouble || !JUNGSEONG.includes(afterDouble)) {
+                jong = dIdx;
+                if (jong > 0) advance = 4;
+              }
+            }
+          }
+          if (advance !== 4) {
+            jong = JONGSEONG.indexOf(j2);
+            if (jong > 0) advance = 3;
+          }
         }
       }
       const code = 0xAC00 + cho * 21 * 28 + jung * 28 + jong;
@@ -2949,7 +3016,7 @@ const SPELL_DATA = {
     {
       jp: '病院', kr: '병원',
       // ㅍ(격음), ㅓ↔ㅕ, ㅗ↔ㅝ
-      wrongJamos: ['ㅍ','ㅓ','ㅗ','ㄴ']
+      wrongJamos: ['ㅍ','ㅓ','ㅗ']
     },
     {
       jp: '銀行', kr: '은행',
@@ -2975,8 +3042,8 @@ const SPELL_DATA = {
   7: [
     {
       jp: '宿題', kr: '숙제',
-      // ㅡ↔ㅜ(모음혼동), ㅈ↔ㅊ(격음혼동)
-      wrongJamos: ['ㅜ','ㅊ']
+      // ㅡ↔ㅜ(모음혼동), ㅔ↔ㅐ(모음혼동), ㅈ↔ㅊ(격음혼동)
+      wrongJamos: ['ㅡ','ㅐ','ㅊ']
     },
     {
       jp: '人', kr: '사람',
@@ -2991,12 +3058,12 @@ const SPELL_DATA = {
     {
       jp: 'ある・いる', kr: '있다',
       // ㅣ↔ㅡ(모음혼동), ㅅ↔ㅆ(경음혼동)
-      wrongJamos: ['ㅡ','ㅆ']
+      wrongJamos: ['ㅡ','ㅅ']
     },
     {
       jp: 'ない・いない', kr: '없다',
       // ㅓ↔ㅏ(모음혼동), ㅂ↔ㅍ(격음혼동)
-      wrongJamos: ['ㅏ','ㅍ']
+      wrongJamos: ['ㅗ','ㅍ']
     },
   ],
   5: [
@@ -3005,15 +3072,11 @@ const SPELL_DATA = {
       // ㅆ(경음), ㅈ↔ㅊ, ㅗ↔ㅓ
       wrongJamos: ['ㅆ','ㅊ','ㅗ','ㄱ']
     },
-    {
-      jp: '先生', kr: '선생님',
-      // ㅆ(경음), ㅗ↔ㅓ, ㅔ↔ㅐ, ㄹ↔ㄴ
-      wrongJamos: ['ㅆ','ㅗ','ㅔ','ㄹ']
-    },
+
     {
       jp: '鉛筆', kr: '연필',
       // ㅓ↔ㅕ, ㄹ↔ㄴ, ㅂ↔ㅍ
-      wrongJamos: ['ㅓ','ㄹ','ㅂ','ㅡ']
+      wrongJamos: ['ㅓ','ㄱ','ㅂ','ㅡ']
     },
     {
       jp: 'かさ', kr: '우산',
@@ -3058,7 +3121,7 @@ const SPELL_DATA = {
     {
       jp: '来る', kr: '오다',
       // ㅗ↔ㅓ(모음혼동), ㅂ↔ㅍ(격음혼동)
-      wrongJamos: ['ㅗ','ㅍ']
+      wrongJamos: ['ㅓ','ㅍ']
     },
   ],
   11: [
@@ -3121,7 +3184,7 @@ const SPELL_DATA = {
     { jp: 'スニーカー', kr: '운동화', wrongJamos: ['ㄹ', 'ㅡ'] },
     { jp: 'スカート', kr: '치마', wrongJamos: ['ㅈ', 'ㅡ'] },
     { jp: '韓服', kr: '한복', wrongJamos: ['ㅋ', 'ㅓ'] },
-    { jp: '辛い', kr: '맵다', wrongJamos: ['ㄴ', 'ㅔ'] },
+
     { jp: '似合う', kr: '어울리다', wrongJamos: ['ㄴ', 'ㅗ'] },
     { jp: 'ズボン', kr: '바지', wrongJamos: ['ㅍ', 'ㅓ'] },
     { jp: '便利だ', kr: '편리하다', wrongJamos: ['ㅂ', 'ㅓ'] },
@@ -3130,15 +3193,15 @@ const SPELL_DATA = {
     { jp: '涼しい', kr: '시원하다', wrongJamos: ['ㅆ', 'ㅡ'] },
   ],
   14: [
-    { jp: '運転',               kr: '운전',     wrongJamos: ['ㅇ','ㅓ'] },
-    { jp: '辛い',               kr: '맵다',     wrongJamos: ['ㅁ','ㅓ'] },
-    { jp: '難しい',             kr: '어렵다',   wrongJamos: ['ㅇ','ㅗ'] },
+    { jp: '運転',               kr: '운전',     wrongJamos: ['ㄹ','ㅗ'] },
+    { jp: '辛い',               kr: '맵다',     wrongJamos: ['ㄴ','ㅓ'] },
+    { jp: '難しい',             kr: '어렵다',   wrongJamos: ['ㄴ','ㅗ'] },
     { jp: '速い',               kr: '빠르다',   wrongJamos: ['ㅂ','ㅓ'] },
-    { jp: 'お兄さん（男性）',   kr: '형',       wrongJamos: ['ㅎ','ㅓ'] },
-    { jp: '弟・妹',             kr: '동생',     wrongJamos: ['ㄷ','ㅓ'] },
-    { jp: '花',                 kr: '꽃',       wrongJamos: ['ㄱ','ㅗ'] },
-    { jp: 'お菓子',             kr: '과자',     wrongJamos: ['ㄱ','ㅓ'] },
-    { jp: '英語',               kr: '영어',     wrongJamos: ['ㅇ','ㅏ'] },
+    { jp: 'お兄さん（男性）',   kr: '형',       wrongJamos: ['ㄹ','ㅓ'] },
+    { jp: '弟・妹',             kr: '동생',     wrongJamos: ['ㄴ','ㅓ'] },
+    { jp: '花',                 kr: '꽃',       wrongJamos: ['ㄱ','ㅓ'] },
+    { jp: 'お菓子',             kr: '과자',     wrongJamos: ['ㄴ','ㅓ'] },
+    { jp: '英語',               kr: '영어',     wrongJamos: ['ㄴ','ㅏ'] },
     { jp: '背が高い',           kr: '키가 크다', wrongJamos: ['ㅌ', 'ㅓ'] },
   ],
   8: [
@@ -3184,8 +3247,7 @@ const SPELL_DATA = {
       wrongJamos: ['ㄴ', 'ㅓ'] },
     { jp: '閉める',               kr: '닫다',
       wrongJamos: ['ㅌ', 'ㅓ'] },
-    { jp: '読む',                 kr: '읽다',
-      wrongJamos: ['ㄴ', 'ㅡ'] },
+
     { jp: '教える',               kr: '가르치다',
       wrongJamos: ['ㅋ', 'ㅓ'] },
     { jp: '本当に',               kr: '정말',
@@ -3197,13 +3259,13 @@ const SPELL_DATA = {
     { jp: '先輩',                 kr: '선배',
       wrongJamos: ['ㅆ', 'ㅗ'] },
     { jp: '打つ（テニスをする）', kr: '치다',
-      wrongJamos: ['ㅊ', 'ㅡ'] },
+      wrongJamos: ['ㅈ', 'ㅡ'] },
     { jp: '会う・会います',       kr: '만나다',
-      wrongJamos: ['ㄴ', 'ㅓ'] },
+      wrongJamos: ['ㄹ', 'ㅓ'] },
     { jp: 'ごろ・くらい',         kr: '쯤',
       wrongJamos: ['ㅈ', 'ㅜ'] },
     { jp: '授業',                 kr: '수업',
-      wrongJamos: ['ㅆ', 'ㅡ'] },
+      wrongJamos: ['ㅆ','ㅡ','ㅗ'] },
     { jp: '午後',                 kr: '오후',
       wrongJamos: ['ㄴ', 'ㅓ'] },
     { jp: 'テニス',               kr: '테니스',
@@ -3232,7 +3294,7 @@ const SPELL_DATA = {
     {
       jp: '撮る', kr: '찍다',
       // ㅈ(평음), ㅡ↔ㅣ, ㅋ(격음)
-      wrongJamos: ['ㅈ','ㅡ','ㅋ','ㅏ']
+      wrongJamos: ['ㅈ','ㅡ','ㅋ']
     },
     {
       jp: '食べる', kr: '먹다',
@@ -3242,7 +3304,7 @@ const SPELL_DATA = {
     {
       jp: '聴く', kr: '듣다',
       // ㅌ(격음), ㅜ↔ㅡ, ㄱ↔ㄷ(받침혼동)
-      wrongJamos: ['ㅌ','ㅜ','ㄱ','ㅏ']
+      wrongJamos: ['ㅌ','ㅜ','ㄱ']
     },
     {
       jp: '読む', kr: '읽다',
@@ -3267,7 +3329,7 @@ const SPELL_DATA = {
     {
       jp: '本', kr: '책',
       // ㅈ↔ㅊ(격음혼동), ㅔ↔ㅐ(모음혼동)
-      wrongJamos: ['ㅈ','ㅐ']
+      wrongJamos: ['ㅈ','ㅔ']
     },
     {
       jp: 'ご飯', kr: '밥',
@@ -3290,6 +3352,7 @@ let spScore    = 0;
 let spAnswered = false;
 let spInputJamos = [];   // 현재 입력된 자모 배열
 let spCurrentQ   = null;
+let spStartTime  = 0;    // 문제 표시 시각 (학습시간 측정용)
 
 // 과 선택
 function selectSpellLesson(n) {
@@ -3297,6 +3360,7 @@ function selectSpellLesson(n) {
   document.querySelectorAll('#spell-lesson-grid .lesson-chip').forEach(b => {
     b.classList.toggle('selected', parseInt(b.dataset.lesson) === n);
   });
+  showSpellPractice();
   initSpell();
 }
 
@@ -3325,6 +3389,7 @@ function renderSpellQ() {
   document.getElementById('sp-feedback').className = 'feedback-box';
   document.getElementById('sp-next-btn').classList.remove('visible');
   document.getElementById('sp-q-num').textContent = `${spIdx + 1}/${spQueue.length}`;
+  spStartTime = Date.now();  // 문제 표시 시각 기록
 
   // 집중 모드 태그 표시
   document.getElementById('sp-mode-tag').textContent =
@@ -3461,10 +3526,11 @@ function autoCheck() {
   const fb = document.getElementById('sp-feedback');
   if (correct) {
     fb.className = 'feedback-box correct';
-    fb.innerHTML = `<span class="feedback-icon">✅</span> 정답입니다! <strong>${spCurrentQ.kr}</strong> ＝ ${spCurrentQ.jp}`;
+    fb.innerHTML = `<span class="feedback-icon">✅</span> 正解！ <strong>${spCurrentQ.kr}</strong> ＝ ${spCurrentQ.jp}`;
   } else {
     fb.className = 'feedback-box wrong';
-    fb.innerHTML = `<span class="feedback-icon">❌</span> 정답은 <strong>${spCurrentQ.kr}</strong>입니다.`;
+    fb.innerHTML = `<span class="feedback-icon">❌</span> 正解は <strong>${spCurrentQ.kr}</strong> です。`;
+    // 오답일 때 정답 음절 박스에 표시
     setTimeout(() => {
       const answerSyls = [...spCurrentQ.kr];
       for (let i = 0; i < wordLen; i++) {
@@ -3477,14 +3543,17 @@ function autoCheck() {
     }, 600);
   }
 
+  // ★ 자동으로 넘어가지 않고 「다음」 버튼 표시
   document.getElementById('sp-next-btn').classList.add('visible');
 
+  const spRt = Date.now() - spStartTime;
   sendLog({
     type: 'ANSWER', student: studentId, session: sessionId,
     timestamp: nowStr(), lessonNum: spLesson, questionNum: spIdx + 1,
     questionText: `[철자] ${spCurrentQ.jp}`, correct: correct ? 1 : 0,
     answer: composed, correctAnswer: spCurrentQ.kr,
-    rt_ms: '', score: spScore, tab: 'spell'
+    rt_ms: spRt, learningTime: Math.round(spRt / 1000),
+    score: spScore, tab: 'spell'
   });
 }
 
@@ -3542,6 +3611,37 @@ const TEST_VOCAB_24 = [
 let spTestMode = false;  // 집중 모드 여부
 let spSessionCount = 0;  // 이번 집중 모드 세션 횟수
 
+// ── 철자 탭 메뉴 전환 ──
+function showLessonMenu() {
+  document.getElementById('spell-menu').style.display = 'none';
+  document.getElementById('spell-lesson-menu').style.display = '';
+  document.getElementById('sp-q-card').style.display = 'none';
+  document.getElementById('sp-next-btn').classList.remove('visible');
+  document.getElementById('sp-result').classList.remove('visible');
+  // progress bar 숨기기
+  document.querySelector('.progress-row') &&
+    (document.querySelector('#tab-spell .progress-row').style.display = 'none');
+}
+
+function backToSpellMenu() {
+  document.getElementById('spell-lesson-menu').style.display = 'none';
+  document.getElementById('spell-menu').style.display = '';
+  document.getElementById('sp-q-card').style.display = 'none';
+  document.getElementById('sp-next-btn').classList.remove('visible');
+  document.getElementById('sp-result').classList.remove('visible');
+  document.querySelector('#tab-spell .progress-row') &&
+    (document.querySelector('#tab-spell .progress-row').style.display = 'none');
+}
+
+function showSpellPractice() {
+  // 문제 화면 표시 + 메뉴 숨김
+  document.getElementById('spell-menu').style.display = 'none';
+  document.getElementById('spell-lesson-menu').style.display = 'none';
+  document.getElementById('sp-q-card').style.display = '';
+  const pr = document.querySelector('#tab-spell .progress-row');
+  if (pr) pr.style.display = '';
+}
+
 function startTestMode() {
   spTestMode = true;
   spSessionCount = 1;
@@ -3561,7 +3661,7 @@ function startTestMode() {
   spIdx = 0; spScore = 0; spAnswered = false;
 
   document.getElementById('sp-result').classList.remove('visible');
-  document.getElementById('sp-q-card').style.display = '';
+  showSpellPractice();
   document.getElementById('sp-next-btn').classList.remove('visible');
 
   renderSpellQ();
@@ -3598,16 +3698,20 @@ function retrySpell() {
 }
 
 function quitTestMode() {
-  // 집중 모드 종료 → 일반 모드로 복귀
+  // 집중 모드 종료 → 메인 메뉴로 복귀
   spTestMode = false;
   spSessionCount = 0;
   document.getElementById('test-mode-btn').style.background = 'var(--accent-soft)';
   document.getElementById('test-mode-btn').style.color = 'var(--accent)';
   document.getElementById('sp-quit-btn').style.display = 'none';
   document.getElementById('sp-result').classList.remove('visible');
-  document.getElementById('sp-q-card').style.display = '';
-  // 기본 과(4과)로 초기화
-  selectSpellLesson(spLesson);
+  // 메인 메뉴로 돌아가기
+  document.getElementById('spell-menu').style.display = '';
+  document.getElementById('spell-lesson-menu').style.display = 'none';
+  document.getElementById('sp-q-card').style.display = 'none';
+  document.getElementById('sp-next-btn').classList.remove('visible');
+  const pr = document.querySelector('#tab-spell .progress-row');
+  if (pr) pr.style.display = 'none';
 }
 
 </script>
