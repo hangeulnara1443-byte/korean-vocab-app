@@ -2475,19 +2475,16 @@ function doLogout() {
     totalScore = 0; gScore = 0; vScore = 0; spScore = 0;
     document.getElementById('ub-id').textContent = '—';
     document.getElementById('ub-score').textContent = '0점';
-    document.getElementById('login-id').value = '';
+    document.getElementById('num-input').value = '';
     document.getElementById('main-screen').classList.remove('active');
     document.getElementById('login-screen').classList.add('active');
   }, 300);
 }
 
 function sendLog(data) {
-  fetch(GAS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  }).catch(() => {});
+  // GET + encodeURIComponent 방식 → no-cors + POST의 CORS 문제를 우회
+  const url = GAS_URL + '?data=' + encodeURIComponent(JSON.stringify(data));
+  fetch(url, { method: 'GET', mode: 'no-cors' }).catch(() => {});
 }
 
 /* ════════════════════════════════════════════════════════
